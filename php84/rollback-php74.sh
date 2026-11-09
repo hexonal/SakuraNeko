@@ -17,6 +17,11 @@ case "$current_image" in
     ix-lotusboard:php84-*) ;;
     *) echo 'Refusing rollback: the active panel is not this PHP 8.4 deployment.' >&2; exit 1 ;;
 esac
+current_entrypoint=$(docker inspect v2board-new --format '{{json .Config.Entrypoint}}')
+case "$current_entrypoint" in
+    *lotusboard-entrypoint*) ;;
+    *) echo 'Refusing legacy rollback: restore the all-in-one deployment before rolling PHP back; this container is now the gateway.' >&2; exit 1 ;;
+esac
 
 docker compose -f "$compose_file" stop -t 120 v2board-new
 saved_vendor=$runtime_dir/rollback/vendor-php84-$(date -u +%Y%m%dT%H%M%SZ)

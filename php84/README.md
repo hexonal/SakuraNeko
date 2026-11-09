@@ -42,9 +42,13 @@ mask because Laravel 8 declares legacy implicit nullable parameters. Other PHP
 errors remain logged. Laravel installs its own deprecation handler after boot;
 this setting does not make the framework fully modern or security-supported.
 
-The current server has one application container on port 84. Graceful process
-shutdown alone does not make container replacement uninterrupted. The proposed
-gateway and blue/green release procedure is documented in the parent repository's
+The production server now uses a stable Caddy gateway on port 84, two web slots,
+and a separate worker and scheduler for the active slot. The image is reused with
+role-specific commands; the default all-in-one command above is retained for
+legacy deployments. Explicitly use SIGTERM when stopping scheduler containers:
+the upstream PHP image defaults to SIGQUIT.
+
+See the deployed topology and release commands in the parent repository's
 [`docs/smooth-deployment.md`](https://github.com/hexonal/lotusboard-docker/blob/main/docs/smooth-deployment.md).
 
 ## Rollback
@@ -56,7 +60,10 @@ The matching vendor tree, Composer files, Compose configuration, and container
 inspection are under
 `/root/lotusboard-docker-new/runtime/php84/rollback/cutover-20261109/`.
 
-Use the guarded `rollback/rollback-php74.sh` script on the server for rollback.
+The guarded `rollback/rollback-php74.sh` script refuses to operate directly on
+the blue/green gateway. Restore the all-in-one topology and stop blue/green
+background roles before using this legacy PHP rollback. For ordinary application
+rollback, use the parent repository's `manage.py promote <previous-slot>`.
 It stops PHP 8.4 workers before restoring the old vendor and Composer files,
 then recreates only the panel's owning Compose service. Do not start the PHP
 7.4 container against PHP 8.4's vendor tree.
