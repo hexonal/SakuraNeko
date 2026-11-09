@@ -11,7 +11,7 @@ fi
 
 if [ "${RUN_SCHEDULER:-true}" = true ]; then
     # BusyBox accepts the legacy file without a final newline; Debian cron does not.
-    { cat /etc/crontabs/root; printf '\n'; } | crontab -
+    { printf 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\n'; cat /etc/crontabs/root; printf '\n'; } | crontab -
 fi
 
 exec "$@"

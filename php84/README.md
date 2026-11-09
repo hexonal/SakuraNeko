@@ -21,7 +21,9 @@ ownership of application storage or uploaded files.
 For an isolated canary, set `RUN_WORKERS=false` and `RUN_SCHEDULER=false`, mount
 the application read-only, and give it separate writable storage and logs.
 The entrypoint handles the legacy crontab's missing final newline for Debian
-cron. It also gives queue processes 120 seconds to stop during future changes.
+cron, and installs a PATH containing `/usr/local/bin` so Debian cron can find PHP.
+The blue/green scheduler additionally declares its cache environment in its own
+crontab and checks actual execution heartbeats. The entrypoint also gives queue processes 120 seconds to stop during future changes.
 
 ## Production
 
